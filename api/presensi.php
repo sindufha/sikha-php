@@ -16,7 +16,13 @@ if (empty($qr_code)) {
 }
 
 // Cari siswa berdasarkan QR
-$stmt = $pdo->prepare("SELECT id, nama, kelas_id FROM siswa WHERE qr_code = ? AND is_active = 1 LIMIT 1");
+$stmt = $pdo->prepare("
+    SELECT s.id, s.nama, s.nis, s.jenis_kelamin, s.kelas_id, k.nama as nama_kelas
+    FROM siswa s
+    JOIN kelas k ON s.kelas_id = k.id
+    WHERE s.qr_code = ? AND s.is_active = 1
+    LIMIT 1
+");
 $stmt->execute([$qr_code]);
 $siswa = $stmt->fetch();
 
@@ -30,7 +36,7 @@ $tahun_ajaran = $stmt->fetch();
 $tahun_ajaran_id = $tahun_ajaran ? $tahun_ajaran['id'] : null;
 
 $today = date('Y-m-d');
-$nowTime = date('H:i:s');
+$nowTime = date('Y-m-d H:i:s');
 
 // Cek apakah sudah presensi hari ini
 $stmt = $pdo->prepare("SELECT id FROM presensi WHERE siswa_id = ? AND tanggal = ? LIMIT 1");
@@ -56,12 +62,19 @@ if ($presensi) {
         }
     }
 
-    $stmt = $pdo->prepare("INSERT INTO presensi (id, siswa_id, kelas_id, tahun_ajaran_id, tanggal, status, jam_datang) VALUES (UUID(), ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO presensi (id, siswa_id, kelas_id, tahun_ajaran_id, tanggal, status, metode, jam_datang) VALUES (UUID(), ?, ?, ?, ?, ?, 'QR', ?)");
     $stmt->execute([$siswa['id'], $siswa['kelas_id'], $tahun_ajaran_id, $today, $status, $nowTime]);
     
     jsonResponse([
-        'success' => true, 
+        'success' => true,
         'message' => 'Presensi datang berhasil dicatat untuk ' . $siswa['nama'],
-        'data' => ['nama' => $siswa['nama'], 'type' => 'DATANG', 'status' => $status]
+        'data' => [
+            'nama' => $siswa['nama'],
+            'nis' => $siswa['nis'],
+            'nama_kelas' => $siswa['nama_kelas'],
+            'jenis_kelamin' => $siswa['jenis_kelamin'],
+            'type' => 'DATANG',
+            'status' => $status
+        ]
     ]);
 }

@@ -31,7 +31,7 @@ include '../includes/header.php';
         <h1 class="page-title">Tahun Ajaran</h1>
         <p class="page-desc"><?= count($tahunList) ?> tahun ajaran terdaftar</p>
     </div>
-    <button class="btn btn-primary h-10 px-4 text-sm rounded-lg gap-2" onclick="openModal(false)">
+    <button class="btn btn-primary h-10 px-4 text-sm rounded-lg gap-2" onclick="openTahunModal(false)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Tambah
     </button>
@@ -64,7 +64,7 @@ include '../includes/header.php';
                     </td>
                     <td>
                         <div class="flex justify-end gap-1">
-                            <button class="btn btn-ghost btn-icon btn-sm" onclick='openModal(<?= json_encode($t) ?>)' title="Edit">
+                            <button class="btn btn-ghost btn-icon btn-sm" onclick='openTahunModal(<?= json_encode($t) ?>)' title="Edit">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
                         </div>
@@ -125,7 +125,7 @@ include '../includes/header.php';
 </div>
 
 <script>
-function openModal(data) {
+function openTahunModal(data) {
     var modal = document.getElementById('modalTahun');
     document.getElementById('modalTitle').innerText = data ? 'Edit Tahun Ajaran' : 'Tambah Tahun Ajaran';
     document.getElementById('formAction').value = data ? 'edit' : 'add';

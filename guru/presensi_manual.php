@@ -3,13 +3,30 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 requireRole('GURU');
 
-// Ambil kelas wali guru ini
-$stmt = $pdo->prepare("SELECT id, nama FROM kelas WHERE wali_kelas_id = ? LIMIT 1");
-$stmt->execute([$_SESSION['user_id']]);
-$kelas = $stmt->fetch();
+// Ambil semua kelas yang tersedia
+$allKelas = $pdo->query("SELECT id, nama FROM kelas ORDER BY nama")->fetchAll();
+
+// Cek apakah guru ini adalah wali kelas
+$waliKelasStmt = $pdo->prepare("SELECT id, nama FROM kelas WHERE wali_kelas_id = ? LIMIT 1");
+$waliKelasStmt->execute([$_SESSION['user_id']]);
+$waliKelas = $waliKelasStmt->fetch();
+$waliKelasId = $waliKelas ? $waliKelas['id'] : null;
+$waliKelasNama = $waliKelas ? $waliKelas['nama'] : null;
+
+// Ambil kelas yang dipilih (default: kelas wali jika ada)
+$selectedKelasId = $_GET['kelas_id'] ?? $waliKelasId ?? ($allKelas[0]['id'] ?? null);
+
+// Ambil data kelas yang dipilih
+$kelas = null;
+foreach ($allKelas as $k) {
+    if ($k['id'] === $selectedKelasId) {
+        $kelas = $k;
+        break;
+    }
+}
 
 if (!$kelas) {
-    die("<div style='padding:2rem;text-align:center;color:var(--color-error);font-weight:500;'>Anda belum terdaftar sebagai wali kelas.</div>");
+    die("<div style='padding:2rem;text-align:center;color:var(--color-error);font-weight:500;'>Tidak ada kelas tersedia.</div>");
 }
 
 $today = date('Y-m-d');
@@ -363,12 +380,22 @@ include '../includes/header.php';
 <div class="filter-card animate-in">
     <form method="POST" id="presensiForm">
         <input type="hidden" name="presensi_data" id="presensiData" value="">
-        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap;">
             <div style="flex:1;min-width:200px;">
                 <label class="label">Pilih Kelas</label>
-                <select class="select" disabled>
-                    <option value="<?= escape($kelas['id']) ?>"><?= escape($kelas['nama']) ?></option>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <select class="select" id="kelasSelect" style="max-width:200px;" onchange="window.location.href='?kelas_id='+this.value">
+                        <?php foreach ($allKelas as $k): ?>
+                        <option value="<?= escape($k['id']) ?>" <?= $k['id'] === $selectedKelasId ? 'selected' : '' ?>><?= escape($k['nama']) ?></option>
+                        <?php endforeach; ?>
                 </select>
+                    <?php if ($waliKelasNama): ?>
+                    <span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;background:var(--color-primary-50);color:var(--color-primary-dark);border-radius:9999px;font-size:0.75rem;font-weight:600;white-space:nowrap;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Anda wali kelas <?= escape($waliKelasNama) ?>
+                    </span>
+                    <?php endif; ?>
+                </div>
             </div>
             <button type="button" class="btn-simpan" id="btnSimpan">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

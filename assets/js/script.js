@@ -50,22 +50,28 @@ document.addEventListener('click', function(e) {
 function toggleDotMenu(btn, menuId) {
     // Close all other dot menus
     document.querySelectorAll('.dot-menu-items.show').forEach(function(m) {
-        if (m.id !== menuId) m.classList.remove('show');
+        m.classList.remove('show');
+        // Return to original parent
+        if (m.dataset.originalParent) {
+            document.getElementById(m.dataset.originalParent).appendChild(m);
+            delete m.dataset.originalParent;
+        }
     });
     var menu = document.getElementById(menuId);
     if (menu) {
-        menu.classList.toggle('show');
-        if (menu.classList.contains('show')) {
-            // Position menu
+        if (!menu.classList.contains('show')) {
+            // Move to body to escape overflow containers
+            menu.dataset.originalParent = menu.parentElement.id;
+            document.body.appendChild(menu);
+            // Position relative to trigger button
             var rect = btn.getBoundingClientRect();
             menu.style.position = 'fixed';
             menu.style.top = (rect.bottom + 4) + 'px';
-            menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
-        } else {
-            menu.style.position = '';
-            menu.style.top = '';
-            menu.style.left = '';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.left = 'auto';
+            menu.style.zIndex = '9999';
         }
+        menu.classList.toggle('show');
     }
 }
 
@@ -74,6 +80,15 @@ document.addEventListener('click', function(e) {
     if (!e.target.closest('.dot-menu')) {
         document.querySelectorAll('.dot-menu-items.show').forEach(function(m) {
             m.classList.remove('show');
+            m.style.position = '';
+            m.style.top = '';
+            m.style.left = '';
+            m.style.right = '';
+            m.style.zIndex = '';
+            if (m.dataset.originalParent) {
+                document.getElementById(m.dataset.originalParent).appendChild(m);
+                delete m.dataset.originalParent;
+            }
         });
     }
 });

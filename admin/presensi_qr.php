@@ -208,7 +208,7 @@ include '../includes/header.php';
                         };
                         $badgeLabel = match($s['status']) {
                             'HADIR' => 'Hadir',
-                            'TERLAMBAT' => 'Telat',
+                            'TERLAMBAT' => 'Terlambat',
                             'IZIN' => 'Izin',
                             'SAKIT' => 'Sakit',
                             'ALFA' => 'Alfa',
@@ -340,7 +340,7 @@ function addScanItem(data) {
     const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
     const isLaki = data.jenis_kelamin === 'LAKI_LAKI';
     const statusClass = data.status === 'HADIR' ? 'badge-success' : (data.status === 'TERLAMBAT' ? 'badge-warning' : 'badge-info');
-    const statusLabel = data.status === 'HADIR' ? 'Hadir' : (data.status === 'TERLAMBAT' ? 'Telat' : data.status);
+    const statusLabel = data.status === 'HADIR' ? 'Hadir' : (data.status === 'TERLAMBAT' ? 'Terlambat' : data.status);
 
     const html = `
         <div class="scan-item" style="background:var(--color-primary-50);animation:fadeHighlight 2s ease forwards;">

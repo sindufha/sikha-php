@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Jakarta');
+
 $host = '127.0.0.1';
 $db = 'sikha_db';
 $user = 'root';
